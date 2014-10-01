@@ -4,7 +4,8 @@
 ```elixir
 # config/config.exs
 
-config :mailgun
+config :mailgun, domain: "foo@bar.com",
+                 key: System.get_env("MAILGUN_KEY")
 
 
 # lib/mailer.ex
