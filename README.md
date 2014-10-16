@@ -4,14 +4,14 @@
 ```elixir
 # config/config.exs
 
-config :mailgun, domain: "foo@bar.com",
-                 key: System.get_env("MAILGUN_KEY")
+config :my_app, :mailbun_domain: "foo@bar.com",
+                :mailgun_key: System.get_env("MAILGUN_KEY")
 
 
 # lib/mailer.ex
 defmodule MyApp.Mailer do
-  use Mailgun.Client, domain: Application.get_env(:mailgun, :domain),
-                      key: Application.get_env(:mailgun, :key)
+  use Mailgun.Client, domain: Application.get_env(:my_app, :mailgun_domain),
+                      key: Application.get_env(:my_app, :mailgun_key)
 
   @from "info@example.com"
 
