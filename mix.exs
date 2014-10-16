@@ -4,8 +4,16 @@ defmodule Mailgun.Mixfile do
   def project do
     [app: :mailgun,
      version: "0.0.1",
-     elixir: "~> 1.0.0",
-     deps: deps]
+     elixir: "~> 1.0.0 or ~> 1.1",
+     deps: deps,
+     package: [
+       contributors: ["Chris McCord"],
+       licenses: ["MIT"],
+       links: %{github: "https://github.com/chrismccord/mailgun"}
+     ],
+     description: """
+     Elixir Mailgun Client
+     """]
   end
 
   # Configuration for the OTP application
