@@ -4,8 +4,8 @@
 ```elixir
 # config/config.exs
 
-config :my_app, :mailbun_domain: "foo@bar.com",
-                :mailgun_key: System.get_env("MAILGUN_KEY")
+config :my_app, mailgun_domain: "foo@bar.com",
+                mailgun_key: System.get_env("MAILGUN_KEY")
 
 
 # lib/mailer.ex
