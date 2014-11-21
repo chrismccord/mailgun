@@ -11,7 +11,7 @@ defmodule Mailgun.Client do
     end
   end
 
-  def get_attachment(mailer, url, config) do
+  def get_attachment(mailer, url) do
     config = mailer.conf
     request :get, url, "api", config[:key], ""
   end
