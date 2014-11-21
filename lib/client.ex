@@ -4,10 +4,16 @@ defmodule Mailgun.Client do
 
   defmacro __using__(config) do
     quote do
+      def conf, do: unquote(config)
       def send_email(email) do
-        unquote(__MODULE__).send_email(unquote(config), email)
+        unquote(__MODULE__).send_email(conf(), email)
       end
     end
+  end
+
+  def get_attachment(mailer, url, config) do
+    config = mailer.conf
+    request :get, url, "api", config[:key], ""
   end
 
   def send_email(conf, email) do
@@ -23,10 +29,16 @@ defmodule Mailgun.Client do
 
   def request(method, url, user, pass, body) do
     url     = String.to_char_list(url)
-    ctype   = 'application/x-www-form-urlencoded'
-    headers = [auth_header(user, pass), {'Content-Type', ctype}]
 
-    :httpc.request(method, {url, headers, ctype, body}, [], body_format: :binary)
+    case method do
+      :get ->
+        headers = [auth_header(user, pass)]
+        :httpc.request(:get, {url, headers}, [], body_format: :binary)
+      _    ->
+        ctype   = 'application/x-www-form-urlencoded'
+        headers = [auth_header(user, pass), {'Content-Type', ctype}]
+        :httpc.request(method, {url, headers, ctype, body}, [], body_format: :binary)
+    end
     |> normalize_response
   end
 
@@ -48,4 +60,3 @@ defmodule Mailgun.Client do
     end
   end
 end
-
