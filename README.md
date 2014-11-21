@@ -4,8 +4,8 @@
 ```elixir
 # config/config.exs
 
-config :my_app, :mailbun_domain: "foo@bar.com",
-                :mailgun_key: System.get_env("MAILGUN_KEY")
+config :my_app, mailgun_domain: "foo@bar.com",
+                mailgun_key: System.get_env("MAILGUN_KEY")
 
 
 # lib/mailer.ex
@@ -28,3 +28,12 @@ iex> MyApp.Mailer.send_welcome_email(user)
 {:ok, ...}
 ```
 
+### Installation
+
+Add mailgun to your `mix.exs` dependencies:
+
+  ```elixir
+  def deps do
+    [ {:mailgun, "~> 0.0.1"} ]
+  end
+  ```
