@@ -20,7 +20,8 @@ defmodule Mailgun.Client do
     request :post, url("/messages", conf[:domain]), "api", conf[:key], URI.encode_query(
       to: Dict.fetch!(email, :to),
       from: Dict.fetch!(email, :from),
-      text: Dict.fetch!(email, :body),
+      text: Dict.get(email, :text),
+      html: Dict.get(email, :html),
       subject: Dict.get(email, :subject, "")
     )
   end

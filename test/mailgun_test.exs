@@ -34,7 +34,7 @@ defmodule MailgunTest do
                                               to: "foo@bar.test",
                                               from: "foo@bar.test",
                                               subject: "hello!",
-                                              body: "How goes it?"
+                                              text: "How goes it?"
 
       assert body == @success_json
     end
@@ -51,7 +51,7 @@ defmodule MailgunTest do
                                                          to: "foo@bar.test",
                                                          from: "foo@bar.test",
                                                          subject: "hello!",
-                                                         body: "How goes it?"
+                                                         text: "How goes it?"
 
       assert status == 400
       assert body == @error_json
