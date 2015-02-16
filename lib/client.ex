@@ -13,31 +13,68 @@ defmodule Mailgun.Client do
 
   def get_attachment(mailer, url) do
     config = mailer.conf
-    request :get, url, "api", config[:key], ""
+    request :get, url, "api", config[:key], [], "", ""
   end
 
   def send_email(conf, email) do
-    request :post, url("/messages", conf[:domain]), "api", conf[:key], URI.encode_query(
-      to: Dict.fetch!(email, :to),
-      from: Dict.fetch!(email, :from),
-      text: Dict.get(email, :text),
-      html: Dict.get(email, :html),
-      subject: Dict.get(email, :subject, "")
-    )
+    boundary = '------------a450glvjfEoqerAc1p431paQlfDac152cadADfd'
+    ctype = :lists.concat(['multipart/form-data; boundary=', boundary])
+
+    attrs = [
+      to: Dict.fetch!(email, :to) |> String.to_char_list,
+      from: Dict.fetch!(email, :from) |> String.to_char_list,
+      text: Dict.get(email, :text, "") |> String.to_char_list,
+      html: Dict.get(email, :html, "") |> String.to_char_list,
+      subject: Dict.get(email, :subject, "") |> String.to_char_list,
+    ]
+
+    attachments =
+      email
+      |> Dict.get(:attachments, [])
+      |> Enum.reduce([], fn upload, acc ->
+        data = :erlang.binary_to_list(File.read!(upload.path))
+        [{:attachment, String.to_char_list(upload.filename), data} | acc]
+      end)
+
+    body = format_multipart_formdata(boundary, attrs, attachments)
+
+    headers = [{'Content-Length', :erlang.integer_to_list(:erlang.length(attachments))}]
+
+    request(:post, url("/messages", conf[:domain]), "api", conf[:key], headers, ctype, body)
+  end
+  defp format_multipart_formdata(boundary, fields, files) do
+    field_parts = Enum.map(fields, fn {field_name, field_content} ->
+      [:lists.concat(['--', boundary]),
+       :lists.concat(['Content-Disposition: form-data; name=\"', :erlang.atom_to_list(field_name),'\"']),
+       '',
+       field_content]
+    end)
+    field_parts2 = :lists.append(field_parts)
+    file_parts = Enum.map(files, fn {field_name, file_name, file_content} ->
+      [:lists.concat(['--', boundary]),
+       :lists.concat(['Content-Disposition: format-data; name=\"', :erlang.atom_to_list(field_name), '\"; filename=\"', file_name, '\"']),
+       :lists.concat(['Content-Type: ', 'application/octet-stream']),
+       '',
+       file_content]
+    end)
+    file_parts2 = :lists.append(file_parts)
+    ending_parts = [:lists.concat(['--', boundary, '--']), '']
+    parts = :lists.append([field_parts2, file_parts2, ending_parts])
+
+    :string.join(parts, '\r\n')
   end
 
   def url(path, domain), do: Path.join([@base_url, domain, path])
 
-  def request(method, url, user, pass, body) do
+  def request(method, url, user, pass, headers, ctype, body) do
     url     = String.to_char_list(url)
 
     case method do
       :get ->
-        headers = [auth_header(user, pass)]
+        headers = headers ++ [auth_header(user, pass)]
         :httpc.request(:get, {url, headers}, [], body_format: :binary)
       _    ->
-        ctype   = 'application/x-www-form-urlencoded'
-        headers = [auth_header(user, pass), {'Content-Type', ctype}]
+        headers = headers ++ [auth_header(user, pass), {'Content-Type', ctype}]
         :httpc.request(method, {url, headers, ctype, body}, [], body_format: :binary)
     end
     |> normalize_response
