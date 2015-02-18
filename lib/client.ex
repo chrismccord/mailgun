@@ -17,9 +17,26 @@ defmodule Mailgun.Client do
   end
 
   def send_email(conf, email) do
-    boundary = '------------a450glvjfEoqerAc1p431paQlfDac152cadADfd'
-    ctype = :lists.concat(['multipart/form-data; boundary=', boundary])
+    case email[:attachments] do
+      atts when atts in [nil, []] -> send_without_attachments(conf, email)
+      atts when is_list(atts)     -> send_with_attachments(conf, email, atts)
+    end
+  end
+  defp send_without_attachments(conf, email) do
+    attrs = [
+      to: Dict.fetch!(email, :to),
+      from: Dict.fetch!(email, :from),
+      text: Dict.get(email, :text, ""),
+      html: Dict.get(email, :html, ""),
+      subject: Dict.get(email, :subject, ""),
+    ]
+    ctype   = 'application/x-www-form-urlencoded'
+    headers = []
+    body    = URI.encode_query(Dict.drop(attrs, [:attachments]))
 
+    request(:post, url("/messages", conf[:domain]), "api", conf[:key], headers, ctype, body)
+  end
+  defp send_with_attachments(conf, email, attachments) do
     attrs = [
       to: Dict.fetch!(email, :to) |> String.to_char_list,
       from: Dict.fetch!(email, :from) |> String.to_char_list,
@@ -28,10 +45,11 @@ defmodule Mailgun.Client do
       subject: Dict.get(email, :subject, "") |> String.to_char_list,
     ]
 
+    boundary = '------------a450glvjfEoqerAc1p431paQlfDac152cadADfd'
+    ctype = :lists.concat(['multipart/form-data; boundary=', boundary])
+
     attachments =
-      email
-      |> Dict.get(:attachments, [])
-      |> Enum.reduce([], fn upload, acc ->
+      Enum.reduce(attachments, [], fn upload, acc ->
         data = :erlang.binary_to_list(File.read!(upload.path))
         [{:attachment, String.to_char_list(upload.filename), data} | acc]
       end)
@@ -42,6 +60,7 @@ defmodule Mailgun.Client do
 
     request(:post, url("/messages", conf[:domain]), "api", conf[:key], headers, ctype, body)
   end
+
   defp format_multipart_formdata(boundary, fields, files) do
     field_parts = Enum.map(fields, fn {field_name, field_content} ->
       [:lists.concat(['--', boundary]),
