@@ -37,3 +37,18 @@ Add mailgun to your `mix.exs` dependencies:
     [ {:mailgun, "~> 0.0.1"} ]
   end
   ```
+
+### Test mode
+For testing purposes mailgun can output emails to a local file instead of
+actually sending them. Just set the `mode` configuration key to `:test`
+and the `test_file_path` to where you want that file to appear.
+
+# lib/mailer.ex
+defmodule MyApp.Mailer do
+  use Mailgun.Client, domain: Application.get_env(:my_app, :mailgun_domain),
+                      key: Application.get_env(:my_app, :mailgun_key),
+                      mode: :test,
+                      test_file_path: "/tmp/mailgun.json"
+
+...
+end
