@@ -17,6 +17,13 @@ defmodule Mailgun.Client do
   end
 
   def send_email(conf, email) do
+    do_send_email(conf[:mode], conf, email)
+  end
+  defp do_send_email(:test, conf, email) do
+    log_email(conf, email)
+    {:ok, "OK"}
+  end
+  defp do_send_email(_, conf, email) do
     case email[:attachments] do
       atts when atts in [nil, []] -> send_without_attachments(conf, email)
       atts when is_list(atts)     -> send_with_attachments(conf, email, atts)
@@ -59,6 +66,12 @@ defmodule Mailgun.Client do
     headers = [{'Content-Length', :erlang.integer_to_list(:erlang.length(attachments))}]
 
     request(:post, url("/messages", conf[:domain]), "api", conf[:key], headers, ctype, body)
+  end
+  def log_email(conf, email) do
+    json = email
+    |> Enum.into(%{})
+    |> Poison.encode!
+    File.write(conf[:test_file_path], json)
   end
 
   defp format_multipart_formdata(boundary, fields, files) do

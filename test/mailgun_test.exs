@@ -58,4 +58,17 @@ defmodule MailgunTest do
     end
   end
 
+  test "sending in test mode writes the mail fields to a file" do
+    file_path = "/tmp/mailgun.json"
+    config = [domain: "mydomain.test", key: "my-key", mode: :test, test_file_path: file_path]
+    {:ok, _} = Mailgun.Client.send_email config,
+      to: "foo@bar.test",
+      from: "foo@bar.test",
+      subject: "hello!",
+      text: "How goes it?"
+
+    file_contents = File.read!(file_path)
+    assert file_contents == "{\"to\":\"foo@bar.test\",\"text\":\"How goes it?\",\"subject\":\"hello!\",\"from\":\"foo@bar.test\"}"
+  end
+
 end
