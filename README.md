@@ -43,6 +43,7 @@ For testing purposes mailgun can output emails to a local file instead of
 actually sending them. Just set the `mode` configuration key to `:test`
 and the `test_file_path` to where you want that file to appear.
 
+```elixir
 # lib/mailer.ex
 defmodule MyApp.Mailer do
   use Mailgun.Client, domain: Application.get_env(:my_app, :mailgun_domain),
@@ -52,3 +53,4 @@ defmodule MyApp.Mailer do
 
 ...
 end
+```
