@@ -25,8 +25,10 @@ defmodule Mailgun.Client do
   end
   defp do_send_email(_, conf, email) do
     case email[:attachments] do
-      atts when atts in [nil, []] -> send_without_attachments(conf, email)
-      atts when is_list(atts)     -> send_with_attachments(conf, email, atts)
+      atts when atts in [nil, []] ->
+        send_without_attachments(conf, email)
+      atts when is_list(atts) ->
+        send_with_attachments(conf, Dict.delete(email, :attachments), atts)
     end
   end
   defp send_without_attachments(conf, email) do
