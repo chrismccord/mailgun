@@ -30,30 +30,36 @@ defmodule Mailgun.Client do
     end
   end
   defp send_without_attachments(conf, email) do
-    attrs = [
+    attrs = Dict.merge(email, %{
       to: Dict.fetch!(email, :to),
       from: Dict.fetch!(email, :from),
       text: Dict.get(email, :text, ""),
       html: Dict.get(email, :html, ""),
       subject: Dict.get(email, :subject, ""),
-    ]
+    })
     ctype   = 'application/x-www-form-urlencoded'
-    headers = []
     body    = URI.encode_query(Dict.drop(attrs, [:attachments]))
 
-    request(:post, url("/messages", conf[:domain]), "api", conf[:key], headers, ctype, body)
+    request(:post, url("/messages", conf[:domain]), "api", conf[:key], [], ctype, body)
   end
   defp send_with_attachments(conf, email, attachments) do
-    attrs = [
-      to: Dict.fetch!(email, :to) |> String.to_char_list,
-      from: Dict.fetch!(email, :from) |> String.to_char_list,
-      text: Dict.get(email, :text, "") |> String.to_char_list,
-      html: Dict.get(email, :html, "") |> String.to_char_list,
-      subject: Dict.get(email, :subject, "") |> String.to_char_list,
-    ]
+    attrs =
+      email
+      |> Dict.merge(%{
+        to: Dict.fetch!(email, :to),
+        from: Dict.fetch!(email, :from),
+        text: Dict.get(email, :text, ""),
+        html: Dict.get(email, :html, ""),
+        subject: Dict.get(email, :subject, "")})
+      |> Enum.map(fn
+        {k, v} when is_binary(v) -> {k, String.to_char_list(v)}
+        {k, v} -> {k, v}
+      end)
+      |> Enum.into(%{})
 
+    headers  = []
     boundary = '------------a450glvjfEoqerAc1p431paQlfDac152cadADfd'
-    ctype = :lists.concat(['multipart/form-data; boundary=', boundary])
+    ctype    = :lists.concat(['multipart/form-data; boundary=', boundary])
 
     attachments =
       Enum.reduce(attachments, [], fn upload, acc ->
@@ -63,7 +69,7 @@ defmodule Mailgun.Client do
 
     body = format_multipart_formdata(boundary, attrs, attachments)
 
-    headers = [{'Content-Length', :erlang.integer_to_list(:erlang.length(attachments))}]
+    headers = [{'Content-Length', :erlang.integer_to_list(:erlang.length(attachments))} | headers]
 
     request(:post, url("/messages", conf[:domain]), "api", conf[:key], headers, ctype, body)
   end
