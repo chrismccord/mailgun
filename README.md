@@ -19,7 +19,7 @@ defmodule MyApp.Mailer do
     send_email to: user.email,
                from: @from,
                subject: "hello!",
-               body: "Welcome!"
+               text: "Welcome!"
   end
 end
 
