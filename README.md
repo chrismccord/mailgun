@@ -4,8 +4,8 @@
 ```elixir
 # config/config.exs
 
-config :my_app, mailgun_domain: "foo@bar.com",
-                mailgun_key: System.get_env("MAILGUN_KEY")
+config :my_app, mailgun_domain: "https://api.mailgun.net/v3/mydomain.com",
+                mailgun_key: "key-##############"
 
 
 # lib/mailer.ex
@@ -15,16 +15,23 @@ defmodule MyApp.Mailer do
 
   @from "info@example.com"
 
-  def send_welcome_email(user) do
+  def send_welcome_text_email(user) do
     send_email to: user.email,
                from: @from,
                subject: "hello!",
-               body: "Welcome!"
+               text: "Welcome!"
+  end
+
+  def send_welcome_html_email(user) do
+    send_email to: user.email,
+               from: @from,
+               subject: "hello!",
+               html: "<strong>Welcome!</strong>"
   end
 end
 
 
-iex> MyApp.Mailer.send_welcome_email(user)
+iex> MyApp.Mailer.send_welcome_text_email(user)
 {:ok, ...}
 ```
 
