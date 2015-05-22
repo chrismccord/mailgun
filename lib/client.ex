@@ -1,7 +1,5 @@
 defmodule Mailgun.Client do
 
-  @base_url "https://api.mailgun.net/v2/"
-
   defmacro __using__(config) do
     quote do
       def conf, do: unquote(config)
@@ -104,7 +102,7 @@ defmodule Mailgun.Client do
     :string.join(parts, '\r\n')
   end
 
-  def url(path, domain), do: Path.join([@base_url, domain, path])
+  def url(path, domain), do: Path.join([domain, path])
 
   def request(method, url, user, pass, headers, ctype, body) do
     url     = String.to_char_list(url)
