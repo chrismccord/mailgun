@@ -41,7 +41,7 @@ Add mailgun to your `mix.exs` dependencies:
 
   ```elixir
   def deps do
-    [ {:mailgun, "~> 0.0.1"} ]
+    [ {:mailgun, "~> 0.1.1"} ]
   end
   ```
 
