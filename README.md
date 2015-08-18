@@ -1,4 +1,4 @@
-# Elixir Mailgun Client
+# Elixir Mailgun Client [![Build Status](https://travis-ci.org/chrismccord/mailgun.svg)](https://travis-ci.org/chrismccord/mailgun)
 
 
 ```elixir
