@@ -12,7 +12,7 @@ defmodule Mailgun.Client do
 
   def get_attachment(mailer, url) do
     config = mailer.conf
-    request :get, url, "api", config[:key], [], "", ""
+    request config, :get, url, "api", config[:key], [], "", ""
   end
 
   def send_email(conf, email) do
@@ -41,7 +41,7 @@ defmodule Mailgun.Client do
     ctype   = 'application/x-www-form-urlencoded'
     body    = URI.encode_query(Dict.drop(attrs, [:attachments]))
 
-    request(:post, url("/messages", conf[:domain]), "api", conf[:key], [], ctype, body)
+    request(conf, :post, url("/messages", conf[:domain]), "api", conf[:key], [], ctype, body)
   end
   defp send_with_attachments(conf, email, attachments) do
     attrs =
@@ -72,7 +72,7 @@ defmodule Mailgun.Client do
 
     headers = [{'Content-Length', :erlang.integer_to_list(:erlang.length(attachments))} | headers]
 
-    request(:post, url("/messages", conf[:domain]), "api", conf[:key], headers, ctype, body)
+    request(conf, :post, url("/messages", conf[:domain]), "api", conf[:key], headers, ctype, body)
   end
   def log_email(conf, email) do
     json = email
@@ -105,16 +105,17 @@ defmodule Mailgun.Client do
 
   def url(path, domain), do: Path.join([domain, path])
 
-  def request(method, url, user, pass, headers, ctype, body) do
-    url     = String.to_char_list(url)
+  def request(conf, method, url, user, pass, headers, ctype, body) do
+    url  = String.to_char_list(url)
+    opts = conf[:httpc_opts] || []
 
     case method do
       :get ->
         headers = headers ++ [auth_header(user, pass)]
-        :httpc.request(:get, {url, headers}, [], body_format: :binary)
+        :httpc.request(:get, {url, headers}, opts, body_format: :binary)
       _    ->
         headers = headers ++ [auth_header(user, pass), {'Content-Type', ctype}]
-        :httpc.request(method, {url, headers, ctype, body}, [], body_format: :binary)
+        :httpc.request(method, {url, headers, ctype, body}, opts, body_format: :binary)
     end
     |> normalize_response
   end
