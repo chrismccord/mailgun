@@ -61,3 +61,17 @@ defmodule MyApp.Mailer do
 ...
 end
 ```
+
+### httpc options
+Under the hood the client uses [`httpc`](http://erlang.org/doc/man/httpc.html)
+to call Mailgun REST API. You can inject any valid `httpc` options to your
+outbound requests by defining them within `httpc_opts` config entry:
+
+```elixir
+# lib/mailer.ex
+defmodule MyApp.Mailer do
+  use Mailgun.Client, domain: Application.get_env(:my_app, :mailgun_domain),
+                      key: Application.get_env(:my_app, :mailgun_key),
+                      httpc_opts: [connect_timeout: 2000, timeout: 3000]
+...
+```
