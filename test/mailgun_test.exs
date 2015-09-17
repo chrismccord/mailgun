@@ -17,8 +17,7 @@ defmodule MailgunTest do
   end
 
   test "send_email returns {:ok, response} if sent successfully" do
-    config = [domain: "https://api.mailgun.net/v3/mydomain.test", key: "my-key"]
-    set_conf config
+    set_conf [domain: "https://api.mailgun.net/v3/mydomain.test", key: "my-key"]
     use_cassette :stub, [url: "https://api.mailgun.net/v3/mydomain.test/messages",
                          method: "post",
                          status_code: ["HTTP/1.1", 200, "OK"],
