@@ -1,6 +1,6 @@
 defmodule Mailgun.Client do
 
-  def get_attachment(mailer, url) do
+  def get_attachment(url) do
     request :get, url, "api", conf(:key), [], "", ""
   end
 
