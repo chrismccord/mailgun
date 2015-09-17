@@ -1,36 +1,25 @@
 defmodule Mailgun.Client do
 
-  defmacro __using__(config) do
-    quote do
-      @conf unquote(config)
-      def conf, do: @conf
-      def send_email(email) do
-        unquote(__MODULE__).send_email(conf(), email)
-      end
-    end
+  def get_attachment(url) do
+    request :get, url, "api", conf(:key), [], "", ""
   end
 
-  def get_attachment(mailer, url) do
-    config = mailer.conf
-    request config, :get, url, "api", config[:key], [], "", ""
+  def send_email(email) do
+    do_send_email(conf(:mode), email)
   end
-
-  def send_email(conf, email) do
-    do_send_email(conf[:mode], conf, email)
-  end
-  defp do_send_email(:test, conf, email) do
-    log_email(conf, email)
+  defp do_send_email(:test, email) do
+    log_email(email)
     {:ok, "OK"}
   end
-  defp do_send_email(_, conf, email) do
+  defp do_send_email(_, email) do
     case email[:attachments] do
       atts when atts in [nil, []] ->
-        send_without_attachments(conf, email)
+        send_without_attachments(email)
       atts when is_list(atts) ->
-        send_with_attachments(conf, Dict.delete(email, :attachments), atts)
+        send_with_attachments(Dict.delete(email, :attachments), atts)
     end
   end
-  defp send_without_attachments(conf, email) do
+  defp send_without_attachments(email) do
     attrs = Dict.merge(email, %{
       to: Dict.fetch!(email, :to),
       from: Dict.fetch!(email, :from),
@@ -41,9 +30,9 @@ defmodule Mailgun.Client do
     ctype   = 'application/x-www-form-urlencoded'
     body    = URI.encode_query(Dict.drop(attrs, [:attachments]))
 
-    request(conf, :post, url("/messages", conf[:domain]), "api", conf[:key], [], ctype, body)
+    request(:post, url("/messages", conf(:domain)), "api", conf(:key), [], ctype, body)
   end
-  defp send_with_attachments(conf, email, attachments) do
+  defp send_with_attachments(email, attachments) do
     attrs =
       email
       |> Dict.merge(%{
@@ -72,13 +61,13 @@ defmodule Mailgun.Client do
 
     headers = [{'Content-Length', :erlang.integer_to_list(:erlang.length(attachments))} | headers]
 
-    request(conf, :post, url("/messages", conf[:domain]), "api", conf[:key], headers, ctype, body)
+    request(:post, url("/messages", conf(:domain)), "api", conf(:key), headers, ctype, body)
   end
-  def log_email(conf, email) do
+  def log_email(email) do
     json = email
     |> Enum.into(%{})
     |> Poison.encode!
-    File.write(conf[:test_file_path], json)
+    File.write(conf(:test_file_path), json)
   end
 
   defp format_multipart_formdata(boundary, fields, files) do
@@ -105,9 +94,9 @@ defmodule Mailgun.Client do
 
   def url(path, domain), do: Path.join([domain, path])
 
-  def request(conf, method, url, user, pass, headers, ctype, body) do
+  def request(method, url, user, pass, headers, ctype, body) do
     url  = String.to_char_list(url)
-    opts = conf[:httpc_opts] || []
+    opts = conf(:httpc_opts, [])
 
     case method do
       :get ->
@@ -137,4 +126,7 @@ defmodule Mailgun.Client do
       {:error, reason} -> {:error, :bad_fetch, reason}
     end
   end
+
+  defp conf(key),          do: Application.get_env(:mailgun, key)
+  defp conf(key, default), do: Application.get_env(:mailgun, key, default)
 end
