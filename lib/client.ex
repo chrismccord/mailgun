@@ -12,7 +12,7 @@ defmodule Mailgun.Client do
 
   def get_attachment(mailer, url) do
     config = mailer.conf
-    request config, :get, url, "api", config[:key], [], "", ""
+    request config, :get, url, "api", get_conf(config[:key]), [], "", ""
   end
 
   def send_email(conf, email) do
@@ -41,7 +41,7 @@ defmodule Mailgun.Client do
     ctype   = 'application/x-www-form-urlencoded'
     body    = URI.encode_query(Dict.drop(attrs, [:attachments]))
 
-    request(conf, :post, url("/messages", conf[:domain]), "api", conf[:key], [], ctype, body)
+    request(conf, :post, url("/messages", conf[:domain]), "api", get_conf(conf[:key]), [], ctype, body)
   end
   defp send_with_attachments(conf, email, attachments) do
     attrs =
@@ -72,7 +72,7 @@ defmodule Mailgun.Client do
 
     headers = [{'Content-Length', :erlang.integer_to_list(:erlang.length(attachments))} | headers]
 
-    request(conf, :post, url("/messages", conf[:domain]), "api", conf[:key], headers, ctype, body)
+    request(conf, :post, url("/messages", conf[:domain]), "api", get_conf(conf[:key]), headers, ctype, body)
   end
   def log_email(conf, email) do
     json = email
@@ -80,6 +80,9 @@ defmodule Mailgun.Client do
     |> Poison.encode!
     File.write(conf[:test_file_path], json)
   end
+
+  defp get_conf({:system, env_var}), do: get_conf(System.get_env(env_var))
+  defp get_conf(conf) when is_binary(conf), do: conf
 
   defp format_multipart_formdata(boundary, fields, files) do
     field_parts = Enum.map(fields, fn {field_name, field_content} ->
@@ -103,7 +106,7 @@ defmodule Mailgun.Client do
     :string.join(parts, '\r\n')
   end
 
-  def url(path, domain), do: Path.join([domain, path])
+  def url(path, domain), do: Path.join([get_conf(domain), path])
 
   def request(conf, method, url, user, pass, headers, ctype, body) do
     url  = String.to_char_list(url)

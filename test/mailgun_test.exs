@@ -14,6 +14,15 @@ defmodule MailgunTest do
       "https://api.mailgun.net/v3/mydomain.com/messages"
   end
 
+  test "url returns the full url joined with the path and domain config (env var)" do
+    System.put_env %{
+      "MAILGUN_DOMAIN" => "https://api.mailgun.net/v3/mydomain.test"
+    }
+
+    assert Mailgun.Client.url("/messages", {:system, "MAILGUN_DOMAIN"}) ==
+      "https://api.mailgun.net/v3/mydomain.test/messages"
+  end
+
   test "mailers can use Client for configuration automation" do
     defmodule Mailer do
       use Mailgun.Client, domain: "https://api.mailgun.net/v3/mydomain.test", key: "my-key"
