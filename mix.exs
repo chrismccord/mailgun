@@ -2,25 +2,30 @@ defmodule Mailgun.Mixfile do
   use Mix.Project
 
   def project do
-    [app: :mailgun,
-     version: "0.1.3",
-     elixir: "~> 1.0",
-     deps: deps,
-     package: [
-       contributors: ["Chris McCord"],
-       licenses: ["MIT"],
-       links: %{github: "https://github.com/chrismccord/mailgun"}
-     ],
-     description: """
-     Elixir Mailgun Client
-     """]
+    [
+      app: :mailgun,
+      version: "0.1.3",
+      elixir: "~> 1.0",
+      deps: deps,
+      package: [
+        contributors: ["Chris McCord"],
+        licenses: ["MIT"],
+        links: %{github: "https://github.com/chrismccord/mailgun"}
+      ],
+      description: """
+      Elixir Mailgun Client
+      """
+   ]
   end
 
   # Configuration for the OTP application
   #
   # Type `mix help compile.app` for more information
   def application do
-    [applications: [:logger, :inets, :ssl]]
+    [
+      applications: [:logger, :inets, :ssl],
+      included_applications: [:poison]
+    ]
   end
 
   # Dependencies can be Hex packages:
@@ -33,8 +38,9 @@ defmodule Mailgun.Mixfile do
   #
   # Type `mix help deps` for more examples and options
   defp deps do
-    [{:exvcr, "~> 0.4.0", only: [:test]},
-     {:poison, "~> 1.4"}
+    [
+      {:exvcr, "~> 0.4.0", only: [:test]},
+      {:poison, "~> 1.4"}
     ]
   end
 end
