@@ -1,4 +1,86 @@
 defmodule Mailgun.Client do
+  @moduledoc """
+  Module to interact with Mailgun and send emails.
+
+  ## Configuration
+
+      # config/config.exs
+      config :my_app,
+        mailgun_domain: "https://api.mailgun.net/v3/mydomain.com",
+        mailgun_key: "key-##############"
+
+      # lib/user_mailer.ex
+      defmodule MyApp.UserMailer do
+        use Mailgun.Client,
+            domain: Application.get_env(:my_app, :mailgun_domain),
+            key: Application.get_env(:my_app, :mailgun_key),
+            mode: Mix.env
+      end
+
+  ## SENDING EMAILS
+
+  Invoke `send_email/1` method with a keyword list of `:from`, `:to`, `:subject`,
+  `:text`, `:html`, `:attachments`.
+
+      # lib/user_mailer.ex
+      defmodule MyApp.UserMailer do
+        use Mailgun.Client,
+            domain: Application.get_env(:my_app, :mailgun_domain),
+            key: Application.get_env(:my_app, :mailgun_key),
+            mode: Mix.env
+
+        def send_welcome_text_email(email) do
+          send_email to: email,
+                     from: "info@example.com",
+                     subject: "hello!",
+                     text: "Welcome!"
+        end
+
+        def send_welcome_html_email(user) do
+          send_email to: user.email,
+                    from: "info@example.com",
+                    subject: "hello!",
+                    html: "<strong>Welcome!</strong>"
+        end
+      end
+
+      $ iex -S mix
+      iex> MyApp.UserMailer.send_welcome_text_email("us@example.com")
+
+  ## Send an attachment in the email
+
+  Pass the `attachments` option which is a list of maps. Each map
+  (attachment) should have a `filename` and a `path` or `content`.
+
+  Options for each attachment:
+  * `filename` - a string eg: "sample.png"
+  * `path` - a string eg: "/tmp/sample.png"
+  * `content` - a string eg: File.read!("/tmp/sample.png")
+
+  If there is a file_path in the storage that needs to sent in the email,
+  pass that as a map with `path` and `filename`.
+
+      def send_greetings(user, file_path) do
+        send_email to: user.email,
+                  from: @from,
+                  subject: "Happy b'day",
+                  html: "<strong>Cheers!</strong>",
+                  attachments: [%{path: file_path, filename: "greetings.png"}]
+      end
+
+  If a file content is created on the fly using some generator. That file content
+  can be passed(without being written on to the disk) in the map with
+  `content` and `filename`.
+
+      def send_invoice(user) do
+        pdf = Invoice.create_for(user) # a string
+        send_email to: user.email,
+                  from: @from,
+                  subject: "Invoice",
+                  html: "<strong>Your Invoice</strong>",
+                  attachments: [%{content: pdf, filename: "invoice.pdf"}]
+      end
+  """
 
   defmacro __using__(config) do
     quote do
