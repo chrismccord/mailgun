@@ -40,6 +40,33 @@ defmodule MailgunTest do
     end
   end
 
+  test "send_email with attachment returns {:ok, response} if sent successfully" do
+    config = [domain: "https://api.mailgun.net/v3/mydomain.test", key: "my-key"]
+    use_cassette :stub, [url: "https://api.mailgun.net/v3/mydomain.test/messages",
+                         method: "post",
+                         status_code: ["HTTP/1.1", 200, "OK"],
+                         body: @success_json] do
+
+      file_path    = Path.join("fixture", "sample.png")
+      file_content = file_path |> File.read!
+      {:ok, body} = Mailgun.Client.send_email config,
+                                              to: "foo@bar.test",
+                                              from: "foo@bar.test",
+                                              subject: "hello!",
+                                              text: "How goes it?",
+                                              attachments: [%{content: file_content, filename: "sample.png"}]
+      assert body == @success_json
+
+      {:ok, body} = Mailgun.Client.send_email config,
+                                              to: "foo@bar.test",
+                                              from: "foo@bar.test",
+                                              subject: "hello!",
+                                              text: "How goes it?",
+                                              attachments: [%{path: file_path, filename: "sample.png"}]
+      assert body == @success_json
+    end
+  end
+
   test "send_email returns {:error, reason} if send failed" do
     config = [domain: "https://api.mailgun.net/v3/mydomain.test", key: "my-key"]
     use_cassette :stub, [url: "https://api.mailgun.net/v3/mydomain.test/messages",

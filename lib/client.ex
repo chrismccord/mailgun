@@ -64,7 +64,7 @@ defmodule Mailgun.Client do
 
     attachments =
       Enum.reduce(attachments, [], fn upload, acc ->
-        data = :erlang.binary_to_list(File.read!(upload.path))
+        data = parse_attachment(upload) |> :erlang.binary_to_list
         [{:attachment, String.to_char_list(upload.filename), data} | acc]
       end)
 
@@ -74,6 +74,10 @@ defmodule Mailgun.Client do
 
     request(conf, :post, url("/messages", conf[:domain]), "api", conf[:key], headers, ctype, body)
   end
+
+  defp parse_attachment(%{content: content}), do: content
+  defp parse_attachment(%{path: path}), do: File.read!(path)
+
   def log_email(conf, email) do
     json = email
     |> Enum.into(%{})
