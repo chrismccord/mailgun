@@ -28,6 +28,25 @@ defmodule MyApp.Mailer do
                subject: "hello!",
                html: "<strong>Welcome!</strong>"
   end
+
+ # attachments expect a list of maps. Each map should have a filename and path/content
+
+  def send_greetings(user, file_path) do
+    send_email to: user.email,
+               from: @from,
+               subject: "Happy b'day",
+               html: "<strong>Cheers!</strong>",
+               attachments: [%{path: file_path, filename: "greetings.png"}]
+  end
+
+  def send_invoice(user) do
+    pdf = Invoice.create_for(user) # a string
+    send_email to: user.email,
+               from: @from,
+               subject: "Invoice",
+               html: "<strong>Your Invoice</strong>",
+               attachments: [%{content: pdf, filename: "invoice.pdf"}]
+  end
 end
 
 
