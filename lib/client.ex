@@ -11,23 +11,23 @@ defmodule Mailgun.Client do
 
       # lib/user_mailer.ex
       defmodule MyApp.UserMailer do
-        use Mailgun.Client,
-            domain: Application.get_env(:my_app, :mailgun_domain),
-            key: Application.get_env(:my_app, :mailgun_key),
-            mode: Mix.env
+        @config domain: Application.get_env(:my_app, :mailgun_domain),
+                key: Application.get_env(:my_app, :mailgun_key),
+                mode: Mix.env
+        Mailgun.Client, @config
       end
 
-  ## SENDING EMAILS
+  ## Sending Emails
 
   Invoke `send_email/1` method with a keyword list of `:from`, `:to`, `:subject`,
   `:text`, `:html`, `:attachments`.
 
       # lib/user_mailer.ex
       defmodule MyApp.UserMailer do
-        use Mailgun.Client,
-            domain: Application.get_env(:my_app, :mailgun_domain),
-            key: Application.get_env(:my_app, :mailgun_key),
-            mode: Mix.env
+        @config domain: Application.get_env(:my_app, :mailgun_domain),
+                key: Application.get_env(:my_app, :mailgun_key),
+                mode: Mix.env
+        use Mailgun.Client, @config
 
         def send_welcome_text_email(email) do
           send_email to: email,
@@ -53,9 +53,9 @@ defmodule Mailgun.Client do
   (attachment) should have a `filename` and a `path` or `content`.
 
   Options for each attachment:
-  * `filename` - a string eg: "sample.png"
-  * `path` - a string eg: "/tmp/sample.png"
-  * `content` - a string eg: File.read!("/tmp/sample.png")
+    * `filename` - a string eg: "sample.png"
+    * `path` - a string eg: "/tmp/sample.png"
+    * `content` - a string eg: File.read!("/tmp/sample.png")
 
   If there is a file_path in the storage that needs to sent in the email,
   pass that as a map with `path` and `filename`.
@@ -75,10 +75,10 @@ defmodule Mailgun.Client do
       def send_invoice(user) do
         pdf = Invoice.create_for(user) # a string
         send_email to: user.email,
-                  from: @from,
-                  subject: "Invoice",
-                  html: "<strong>Your Invoice</strong>",
-                  attachments: [%{content: pdf, filename: "invoice.pdf"}]
+                   from: @from,
+                   subject: "Invoice",
+                   html: "<strong>Your Invoice</strong>",
+                   attachments: [%{content: pdf, filename: "invoice.pdf"}]
       end
   """
 
