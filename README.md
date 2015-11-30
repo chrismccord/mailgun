@@ -10,8 +10,10 @@ config :my_app, mailgun_domain: "https://api.mailgun.net/v3/mydomain.com",
 
 # lib/mailer.ex
 defmodule MyApp.Mailer do
-  use Mailgun.Client, domain: Application.get_env(:my_app, :mailgun_domain),
-                      key: Application.get_env(:my_app, :mailgun_key)
+  @config domain: Application.get_env(:my_app, :mailgun_domain),
+          key: key: Application.get_env(:my_app, :mailgun_key)
+  use Mailgun.Client, @config
+                      
 
   @from "info@example.com"
 
@@ -72,10 +74,11 @@ and the `test_file_path` to where you want that file to appear.
 ```elixir
 # lib/mailer.ex
 defmodule MyApp.Mailer do
-  use Mailgun.Client, domain: Application.get_env(:my_app, :mailgun_domain),
-                      key: Application.get_env(:my_app, :mailgun_key),
-                      mode: :test,
-                      test_file_path: "/tmp/mailgun.json"
+  @config domain: Application.get_env(:my_app, :mailgun_domain),
+          key: Application.get_env(:my_app, :mailgun_key),
+          mode: :test,
+          test_file_path: "/tmp/mailgun.json"
+  use Mailgun.Client, @config
 
 ...
 end
@@ -89,8 +92,9 @@ outbound requests by defining them within `httpc_opts` config entry:
 ```elixir
 # lib/mailer.ex
 defmodule MyApp.Mailer do
-  use Mailgun.Client, domain: Application.get_env(:my_app, :mailgun_domain),
-                      key: Application.get_env(:my_app, :mailgun_key),
-                      httpc_opts: [connect_timeout: 2000, timeout: 3000]
+  @config domain: Application.get_env(:my_app, :mailgun_domain),
+          key: Application.get_env(:my_app, :mailgun_key),
+          httpc_opts: [connect_timeout: 2000, timeout: 3000]
+  use Mailgun.Client, @config
 ...
 ```
