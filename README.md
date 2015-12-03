@@ -4,7 +4,7 @@
 ```elixir
 # config/config.exs
 
-config :my_app, mailgun_domain: "https://api.mailgun.net/v3/mydomain.com",
+config :my_app, mailgun_domain: "https://api.mailgun.net/v3/" <> "mydomain.com",
                 mailgun_key: "key-##############"
 
 
