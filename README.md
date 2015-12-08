@@ -11,7 +11,7 @@ config :my_app, mailgun_domain: "https://api.mailgun.net/v3/mydomain.com",
 # lib/mailer.ex
 defmodule MyApp.Mailer do
   @config domain: Application.get_env(:my_app, :mailgun_domain),
-          key: key: Application.get_env(:my_app, :mailgun_key)
+          key: Application.get_env(:my_app, :mailgun_key)
   use Mailgun.Client, @config
                       
 
