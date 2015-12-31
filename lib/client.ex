@@ -101,8 +101,8 @@ defmodule Mailgun.Client do
     do_send_email(conf[:mode], conf, email)
   end
   defp do_send_email(:test, conf, email) do
-    log_email(conf, email)
-    {:ok, "OK"}
+    body = log_email(conf, email)
+    {:ok, 200, body }
   end
   defp do_send_email(_, conf, email) do
     case email[:attachments] do
@@ -165,6 +165,7 @@ defmodule Mailgun.Client do
     |> Enum.into(%{})
     |> Poison.encode!
     File.write(conf[:test_file_path], json)
+    Poison.decode! json
   end
 
   defp format_multipart_formdata(boundary, fields, files) do
