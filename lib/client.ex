@@ -14,7 +14,7 @@ defmodule Mailgun.Client do
         @config domain: Application.get_env(:my_app, :mailgun_domain),
                 key: Application.get_env(:my_app, :mailgun_key),
                 mode: Mix.env
-        Mailgun.Client, @config
+        use Mailgun.Client, @config
       end
 
   ## Sending Emails
