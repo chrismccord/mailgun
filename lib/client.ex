@@ -177,7 +177,8 @@ defmodule Mailgun.Client do
     field_parts2 = :lists.append(field_parts)
     file_parts = Enum.map(files, fn {field_name, file_name, file_content} ->
       [:lists.concat(['--', boundary]),
-       :lists.concat(['Content-Disposition: format-data; name=\"', :erlang.atom_to_list(field_name), '\"; filename=\"', file_name, '\"']),
+       :lists.concat(['Content-Disposition: format-data; name=\"inline\"; filename=\"', file_name, '\"']),
+       :lists.concat(['Content-ID: <', file_name, '>']),
        :lists.concat(['Content-Type: ', 'application/octet-stream']),
        '',
        file_content]
