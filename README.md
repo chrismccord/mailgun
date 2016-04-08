@@ -31,6 +31,15 @@ defmodule MyApp.Mailer do
                html: "<strong>Welcome!</strong>"
   end
 
+  # Send email to more than one email address (all addresses should be in one single String seperated with commas)
+
+  def send_welcome_html_email(user) do
+    send_email to: "#{user.email_main}, #{user.email_alternative}",
+               from: @from,
+               subject: "hello!",
+               html: "<strong>Welcome!</strong>"
+  end
+
  # attachments expect a list of maps. Each map should have a filename and path/content
 
   def send_greetings(user, file_path) do
