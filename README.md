@@ -58,11 +58,15 @@ iex> MyApp.Mailer.send_welcome_text_email(user)
 
 ### Installation
 
-Add mailgun to your `mix.exs` dependencies:
+Add mailgun to your `mix.exs` dependencies and to depency applications:
 
   ```elixir
   def deps do
     [ {:mailgun, "~> 0.1.2"} ]
+  end
+  ...
+  def application do
+    [ applications: [:mailgun] ]
   end
   ```
 
