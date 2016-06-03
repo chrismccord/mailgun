@@ -23,6 +23,18 @@ defmodule MailgunTest do
 
   end
 
+  test "mailer configuration is load dynamically" do
+    Application.put_env(:mailgun, :domain, "https://api.mailgun.net/v3/domain.test")
+
+    defmodule Mailer do
+      use Mailgun.Client, domain: Application.get_env(:mailgun, :domain), key: "my-key"
+    end
+
+    Application.put_env(:mailgun, :domain, "https://api.mailgun.net/v3/updated_domain.test")
+
+    assert Mailer.conf() == [domain: "https://api.mailgun.net/v3/updated_domain.test", key: "my-key"]
+  end
+
   test "send_email returns {:ok, response} if sent successfully" do
     config = [domain: "https://api.mailgun.net/v3/mydomain.test", key: "my-key"]
     use_cassette :stub, [url: "https://api.mailgun.net/v3/mydomain.test/messages",
