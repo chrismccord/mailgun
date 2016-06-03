@@ -3,7 +3,7 @@ defmodule Mailgun.Mixfile do
 
   def project do
     [app: :mailgun,
-     version: "0.1.3",
+     version: "0.1.4",
      elixir: "~> 1.0",
      deps: deps,
      package: [
