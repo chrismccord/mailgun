@@ -116,7 +116,6 @@ defmodule Mailgun.Client do
     attrs = Dict.merge(email, %{
       to: Dict.fetch!(email, :to),
       from: Dict.fetch!(email, :from),
-      cc: Dict.fetch!(email, :cc, ""),
       text: Dict.get(email, :text, ""),
       html: Dict.get(email, :html, ""),
       subject: Dict.get(email, :subject, ""),
@@ -132,7 +131,6 @@ defmodule Mailgun.Client do
       |> Dict.merge(%{
         to: Dict.fetch!(email, :to),
         from: Dict.fetch!(email, :from),
-        cc: Dict.fetch!(email, :cc, ""),
         text: Dict.get(email, :text, ""),
         html: Dict.get(email, :html, ""),
         subject: Dict.get(email, :subject, "")})
