@@ -89,6 +89,9 @@ defmodule Mailgun.Client do
       def send_email(email) do
         unquote(__MODULE__).send_email(conf(), email)
       end
+      def get_events(args) do
+        unquote(__MODULE__).get_events(conf(),args)
+      end
     end
   end
 
@@ -222,5 +225,19 @@ defmodule Mailgun.Client do
         {:error, status, json_body}
       {:error, reason} -> {:error, :bad_fetch, reason}
     end
+  end
+
+  @doc """
+  Method for calling Mailguns Event API
+
+  ## Example
+      get_events(ascending: "yes", begin: 0.0, limit: 30)
+
+  See https://documentation.mailgun.com/api-events.html for documentation and
+  options
+  """
+  def get_events(conf, args) do
+    url = "/events?" <> URI.encode_query(args)
+    request(conf, :get, url(url, conf[:domain]), "api", conf[:key], [], nil, nil)
   end
 end
