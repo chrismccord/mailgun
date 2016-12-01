@@ -89,6 +89,7 @@ defmodule Mailgun.Client do
       def send_email(email) do
         unquote(__MODULE__).send_email(conf(), email)
       end
+      defoverridable [conf: 0]
     end
   end
 
