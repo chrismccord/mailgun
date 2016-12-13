@@ -186,7 +186,7 @@ defmodule Mailgun.Client do
     ending_parts = [:lists.concat(['--', boundary, '--']), '']
     parts = :lists.append([field_parts2, file_parts2, ending_parts])
 
-    :string.join(parts, '\r\n')
+    :string.join(parts, '\r\n') |> List.to_string()
   end
 
   def url(path, domain), do: Path.join([domain, path])
