@@ -161,10 +161,17 @@ defmodule Mailgun.Client do
   defp parse_attachment(%{path: path}), do: File.read!(path)
 
   def log_email(conf, email) do
-    json = email
-    |> Enum.into(%{})
-    |> Poison.encode!
+    json = Poison.encode!(parse_log_file(conf) ++ [Enum.into(email, %{})])
     File.write(conf[:test_file_path], json)
+  end
+
+  defp parse_log_file(conf) do
+    case File.read(conf[:test_file_path]) do
+      {:ok, contents} ->
+        Poison.Parser.parse!(contents)
+      {:error, _} ->
+        []
+    end
   end
 
   defp format_multipart_formdata(boundary, fields, files) do
