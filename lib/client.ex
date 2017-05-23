@@ -109,7 +109,7 @@ defmodule Mailgun.Client do
       atts when atts in [nil, []] ->
         send_without_attachments(conf, email)
       atts when is_list(atts) ->
-        send_with_attachments(conf, Dict.delete(email, :attachments), atts)
+        send_with_attachments(conf, Dict.drop(email, get_atts_to_drop(email)), atts)
     end
   end
   defp send_without_attachments(conf, email) do
@@ -119,9 +119,10 @@ defmodule Mailgun.Client do
       text: Dict.get(email, :text, ""),
       html: Dict.get(email, :html, ""),
       subject: Dict.get(email, :subject, ""),
+      "recipient-variables": Dict.get(email, :recipient_variables, "")
     })
     ctype   = 'application/x-www-form-urlencoded'
-    body    = URI.encode_query(Dict.drop(attrs, [:attachments]))
+    body    = URI.encode_query(Dict.drop(attrs, get_atts_to_drop(email)))
 
     request(conf, :post, url("/messages", conf[:domain]), "api", conf[:key], [], ctype, body)
   end
@@ -133,7 +134,8 @@ defmodule Mailgun.Client do
         from: Dict.fetch!(email, :from),
         text: Dict.get(email, :text, ""),
         html: Dict.get(email, :html, ""),
-        subject: Dict.get(email, :subject, "")})
+        subject: Dict.get(email, :subject, ""),
+        "recipient-variables": Dict.get(email, :recipient_variables, "")})
       |> Enum.map(fn
         {k, v} when is_binary(v) -> {k, String.to_char_list(v)}
         {k, v} -> {k, v}
@@ -221,6 +223,14 @@ defmodule Mailgun.Client do
       {:ok, {{_httpvs, status, _status_phrase}, _headers, json_body}} ->
         {:error, status, json_body}
       {:error, reason} -> {:error, :bad_fetch, reason}
+    end
+  end
+
+  defp get_atts_to_drop(email) do
+    if Dict.get(email, :recipient_variables, "") == "" do
+      [:attachments, "recipient-variables"]
+    else
+      [:attachments]
     end
   end
 end
