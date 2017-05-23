@@ -119,6 +119,7 @@ defmodule Mailgun.Client do
       text: Dict.get(email, :text, ""),
       html: Dict.get(email, :html, ""),
       subject: Dict.get(email, :subject, ""),
+      "recipient-variables": Dict.get(email, :recipient_variables, "")
     })
     ctype   = 'application/x-www-form-urlencoded'
     body    = URI.encode_query(Dict.drop(attrs, [:attachments]))
@@ -133,7 +134,8 @@ defmodule Mailgun.Client do
         from: Dict.fetch!(email, :from),
         text: Dict.get(email, :text, ""),
         html: Dict.get(email, :html, ""),
-        subject: Dict.get(email, :subject, "")})
+        subject: Dict.get(email, :subject, ""),
+        "recipient-variables": Dict.get(email, :recipient_variables, "")})
       |> Enum.map(fn
         {k, v} when is_binary(v) -> {k, String.to_char_list(v)}
         {k, v} -> {k, v}
