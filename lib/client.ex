@@ -84,8 +84,7 @@ defmodule Mailgun.Client do
 
   defmacro __using__(config) do
     quote do
-      @conf unquote(config)
-      def conf, do: @conf
+      def conf, do: unquote(config)
       def send_email(email) do
         unquote(__MODULE__).send_email(conf(), email)
       end
